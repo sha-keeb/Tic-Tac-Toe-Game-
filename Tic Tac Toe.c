@@ -43,3 +43,87 @@ bool apply_move(Board *b, int r, int c, char sym)
     b->cells[r][c] = sym; // The symbol to place ('X' or 'O')
     return true;
 }
+
+void print_board(Board *b)
+{
+    printf("\n   ");
+    for (int c = 0; c < b->n; c++)
+        printf("%2d", c + 1); // Loops through columns and prints column numbers
+    printf("\n");
+    for (int r = 0; c < b->; c++)
+    {
+        printf("%2d", r + 1);
+        for (int c = 0; c < b->n; c++)
+        {
+            printf(" %c ", b->cells[r][c]); // Prints the character in the cell
+            if (c != b->n - 1)
+                printf("|"); // Adds a vertical divider | between cells, except after the last column.
+        }
+        printf("\n   ");
+        if (r != b->n - 1)
+        { // This checks if the current row r is not the last row.
+            for (int c = 0; c < b->n; c++)
+            {
+                printf("---"); // It will print the horizontal divider for each cell.
+                if (c != b->n - 1)
+                    printf("+");
+            }
+        }
+        printf("\n");
+    }
+}
+
+/*++++++++++++checking  win or draw++++++++++++++++*/
+bool check_row(Board *b, int r, char s)
+{
+    for (int c = 0; c < b->n; c++) // b->n is the size of the board (e.g., 3 for a 3×3 board)
+        if (b > cells[r][c] != s)
+            return false;
+    return true;
+}
+
+bool check_diag(Board *b, int c, char s)
+{                                  // char s: the symbol to check for ( 'X' or 'O')
+    for (int r = 0; r < b->n; r++) // loop to every row
+        if (b->cells[r][c] != s)
+            return false;
+    return true;
+}
+
+bool check_diag(Board *b, char s)
+{
+    bool main = true, anti = true;
+    for (int i = 0; i < b->n; i++)
+    {
+        bool check_diag(Board * b, char s)
+        {
+            bool main = true, anti = true;
+            for (int i = 0; i < b->n; i++)
+            {
+                if (b->cells[i][i] != s)
+                    main = false; // Check both main and anti-diagonals for a winning line of symbol 's'
+                if (b->cells[i][b->n - 1 - i] != s)
+                    anti = false;
+            }
+            return main || anti;
+        }
+
+        bool check_win(Board * b, char s)
+        {
+            for (int r = 0; r < b->n; r++)
+                if (check_row(b, r, s))
+                    return true;
+            for (int c = 0; c < b->n; c++)
+                if (check_col(b, c, s))
+                    return true;
+            return check_diag(b, s);
+        }
+
+        bool board_full(Board * b)
+        {
+            for (int r = 0; r < b->n; r++)
+                for (int c = 0; c < b->n; c++)
+                    if (b->cells[r][c] == ' ')
+                        return false;
+            return true;
+        }
