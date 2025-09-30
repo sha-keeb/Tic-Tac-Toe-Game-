@@ -127,3 +127,66 @@ bool check_diag(Board *b, char s)
                         return false;
             return true;
         }
+
+        /* ++++++++++++++Input helpers +++++++++++++++++++++ */
+        void flush_line(void)
+        {
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF)
+            {
+            } // end-of-file (EOF)
+        }
+
+        int read_move(Board * b, int *r, int *c)
+        {
+            char line[50];
+            while (1)
+            {
+                printf("Enter row and col (e.g., 2 3) or M=Main Menu, E=Exit: ");
+                if (!fgets(line, sizeof(line), stdin))
+                    continue;
+
+                // Check for Main Menu or Exit
+                if (line[0] == 'M' || line[0] == 'm')
+                    return 1; // main menu
+                if (line[0] == 'E' || line[0] == 'e')
+                    return 2; // exit
+
+                int rr, cc;
+                if (sscanf(line, "%d %d", &rr, &cc) == 2)
+                {
+                    rr--;
+                    cc--;
+                    if (rr >= 0 && rr < b->n && cc >= 0 && cc < b->n)
+                    {
+                        *r = rr;
+                        *c = cc;
+                        return 0; // valid move
+                    }
+                }
+                printf("Invalid input. Try again.\n");
+            }
+        }
+
+        /* +++++++++++++++ Computer move ++++++++++++++++ */
+
+        void computer_move(Board * b, int *r, int *c)
+        {
+            int n = b->n;
+            int empty_cells[MAX_SIZE * MAX_SIZE][2];
+            int count = 0;
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (is_empty(b, i, j))
+                    {
+                        empty_cells[count][0] = i;
+                        empty_cells[count][1] = j;
+                        count++;
+                    }
+            if (count > 0)
+            {
+                int pick = rand() % count;
+                *r = empty_cells[pick][0];
+                *c = empty_cells[pick][1];
+            }
+        }
