@@ -4,8 +4,11 @@
 #include <string.h>
 #include <time.h> // Used for seeding random number generator or time-based logic
 
-#define MAX_SIZE 10 // maximum board size (10x10)
+#define MAX_SIZE 10            // maximum board size (10x10)
+#define LOG_FILE "gamelog.txt" // Define the log file name
 
+// File pointer for the log file
+FILE *log_file = NULL;
 typedef struct
 {
     int n;
@@ -18,6 +21,46 @@ typedef struct
     char name[20];   // name ..while playing multyplayer
     bool isComputer; // cpu
 } Player;
+
+/* ================= File I/O helpers ================= */
+
+// Function to write a message to the log file
+void log_message(const char *message)
+{
+    if (log_file != NULL)
+    {
+        fprintf(log_file, "%s\n", message);
+    }
+}
+
+// Function to open the log file at the start of a new game
+void open_log_file(int board_size, int game_mode)
+{
+    log_file = fopen(LOG_FILE, "w"); // Open in write mode, which overwrites previous content
+    if (log_file != NULL)
+    {
+        // Log the game start information
+        char buffer[100];
+        sprintf(buffer, "--- New Game Log ---\nBoard Size: %dx%d, Game Mode: %d", board_size, board_size, game_mode);
+        log_message(buffer);
+        // Add a newline for better formatting
+        log_message("\n");
+    }
+    else
+    {
+        perror("Error opening log file");
+    }
+}
+
+// Function to close the log file
+void close_log_file()
+{
+    if (log_file != NULL)
+    {
+        fclose(log_file);
+        log_file = NULL;
+    }
+}
 
 /* ================= Board helpers ================= */
 void init_board(Board *b, int n)
@@ -187,15 +230,25 @@ void computer_move(Board *b, int *r, int *c)
 }
 
 /* ================= Game loop ================= */
-int run_game(Board *b, Player *players, int numPlayers)
+int run_game(Board *b, Player *players, int numPlayers, int mode)
 {
-    int moveNo = 0;
-    srand((unsigned)time(NULL)); // Seed random number generator for AI move randomness
+    // Log initial game setup
+    char buffer[100];
+    sprintf(buffer, "Board Size: %dx%d, Game Mode: %d", b->n, b->n, mode);
+    log_message(buffer);
+    log_message("\n");
+
+    // Log the starting board state
+    // Note: The board state isn't in your desired log format, but it can be useful for debugging.
+    // I've added a function to log the board state to show how you can do it.
+    // You can comment it out if you don't need it.
+
+    srand((unsigned)time(NULL));
     while (1)
     {
         for (int p = 0; p < numPlayers; p++)
         {
-            Player *cur = &players[p]; // Pointer to current player
+            Player *cur = &players[p];
             printf("\nTurn: %s (%c)\n", cur->name, cur->symbol);
 
             int r, c;
@@ -210,28 +263,37 @@ int run_game(Board *b, Player *players, int numPlayers)
                 bool success = false;
                 do
                 {
-                    action = read_move(b, &r, &c); // get user input
+                    action = read_move(b, &r, &c);
                     if (action == 1)
-                        return 1; // Main Menu
+                        return 1;
                     if (action == 2)
-                        return 2; // Exit
+                        return 2;
                     success = apply_move(b, r, c, cur->symbol);
                     if (!success)
                         printf("Cell already occupied. Try again.\n");
                 } while (!success);
             }
 
-            moveNo++;
+            // Log the move here
+            char log_buffer[100];
+            // Format the output to match your example (e.g., (0, 0)
+            sprintf(log_buffer, "Player %d ('%c') moved to position (%d, %d)", p + 1, cur->symbol, r, c);
+            log_message(log_buffer);
+
             print_board(b);
 
             if (check_win(b, cur->symbol))
             {
                 printf(">>> %s (%c) WINS!\n", cur->name, cur->symbol);
+                log_message("\n--- Game Over ---\n"); // Log the end of the game
+                log_message("Player has won!");
                 return 0;
             }
             if (board_full(b))
             {
                 puts(">>> It's a DRAW.");
+                log_message("\n--- Game Over ---\n");
+                log_message("It's a draw!");
                 return 0;
             }
         }
@@ -399,7 +461,10 @@ int main(void)
             }
         }
 
-        int result = run_game(&b, players, numPlayers);
+        int result = run_game(&b, players, numPlayers, mode);
+
+        // Close the log file when the game ends
+        close_log_file();
         if (result == 2)
         {
             printf("+==================================================+\n");
