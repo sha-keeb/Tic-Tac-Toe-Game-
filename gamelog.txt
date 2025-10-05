@@ -1,0 +1,18 @@
+--- New Game Log ---
+Board Size: 3x3, Game Mode: 1
+
+
+Board Size: 3x3, Game Mode: 1
+
+
+Player 1 ('X') moved to position (1, 0)
+Player 2 ('O') moved to position (1, 2)
+Player 1 ('X') moved to position (1, 1)
+Player 2 ('O') moved to position (2, 1)
+Player 1 ('X') moved to position (0, 0)
+Player 2 ('O') moved to position (0, 2)
+Player 1 ('X') moved to position (2, 0)
+
+--- Game Over ---
+
+Player has won!
